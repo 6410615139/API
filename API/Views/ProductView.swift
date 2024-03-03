@@ -99,7 +99,13 @@ struct ProductView: View {
             title: Text("Confirm Delete"),
             message: Text("Are you sure you want to delete this product?"),
             primaryButton: .destructive(Text("Delete")) {
-                _ = stock.remove_product(product)
+                print("delete alert")
+                let success = stock.remove_product(product)
+                if !success {
+                    print("Error unable to delete")
+                } else {
+                    print("Remove success")
+                }
             },
             secondaryButton: .cancel()
         )

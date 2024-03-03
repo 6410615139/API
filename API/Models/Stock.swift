@@ -65,6 +65,7 @@ class Stock: ObservableObject {
     func remove_product(_ remove: Product) -> Bool {
         for product in container {
             if remove.name == product.name {
+                self.container.remove(at: self.find_index(remove))
                 return true
             }
         }

@@ -15,7 +15,7 @@ var products: [Product] = [
 
 struct Menu: View {
     @Binding var sampleBill: Bill
-    @Binding var sampleStock: Stock
+    @ObservedObject var sampleStock: Stock
     
     @State private var showingAddProductSheet = false
     @State private var newProductName = ""
@@ -29,7 +29,7 @@ struct Menu: View {
             VStack {
                 List {
                     ForEach($sampleStock.container, id: \.name) { product in
-                        ProductRow(product: product, bill: $sampleBill, stock: $sampleStock)
+                        ProductRow(product: product.wrappedValue, bill: $sampleBill, stock: sampleStock)
                     }
                 }
                 NavigationLink(destination: BillView(bill: sampleBill)) {
@@ -109,12 +109,12 @@ struct Menu: View {
 }
 
 struct ProductRow: View {
-    @Binding var product: Product
+    @ObservedObject var product: Product
     @Binding var bill: Bill
-    @Binding var stock: Stock
+    @ObservedObject var stock: Stock
 
     var body: some View {
-        NavigationLink(destination: ProductView(product: $product, stock: stock, bill: $bill)
+        NavigationLink(destination: ProductView(product: product, stock: stock, bill: $bill)
             ) {
             HStack {
                 Text(product.name)
@@ -138,6 +138,6 @@ struct ProductRow: View {
 
 struct Menu_Previews: PreviewProvider {
     static var previews: some View {
-        Menu(sampleBill: .constant(Bill()), sampleStock: .constant(Stock(products)))
+        Menu(sampleBill: .constant(Bill()), sampleStock: Stock(products))
     }
 }

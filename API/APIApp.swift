@@ -11,7 +11,7 @@ import SwiftUI
 struct APIApp: App {
     var body: some Scene {
         WindowGroup {
-            Menu(sampleBill: .constant(Bill()), sampleStock: .constant(Stock(products)))
+            Menu(sampleBill: .constant(Bill()), sampleStock: Stock(products))
         }
     }
 }

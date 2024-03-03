@@ -8,26 +8,25 @@
 import SwiftUI
 
 struct ProductView: View {
-    @Binding var product: Product
+    @ObservedObject var product: Product
     @ObservedObject var stock: Stock
     @Binding var bill: Bill
     
     @State private var showingEditProductSheet = false
     @State private var showingDiscountProductSheet = false
-    
     @State private var showingDeleteAlert = false
-    @State private var showingEditAlert = false
     
-    @State private var nameString: String
-    @State private var priceString: String
+    @State private var message = ""
+    @State private var nameString = ""
+    @State private var priceString = ""
     @State private var discountPercentString: String = "0"
 
-    init(product: Binding<Product>, stock: Stock, bill: Binding<Bill>) {
-            _product = product
+    init(product: Product, stock: Stock, bill: Binding<Bill>) {
+            _product = ObservedObject(initialValue: product)
             _stock = ObservedObject(initialValue: stock)
             _bill = bill
-            _nameString = State(initialValue: product.wrappedValue.name)
-            _priceString = State(initialValue: "\(product.wrappedValue.price)")
+            _nameString = State(initialValue: product.name)
+            _priceString = State(initialValue: "\(product.price)")
         }
     
     var body: some View {
@@ -50,7 +49,7 @@ struct ProductView: View {
 
             HStack(spacing: 7) {
                 Button(action: {
-                    self.showingDeleteAlert = true
+                    showingDeleteAlert = true
                 }) {
                     Label("Delete", systemImage: "trash")
                         .foregroundColor(.white)
@@ -60,7 +59,7 @@ struct ProductView: View {
                 }
 
                 Button(action: {
-                    self.showingEditProductSheet = true
+                    showingEditProductSheet = true
                 }) {
                     Label("Edit", systemImage: "pencil")
                         .foregroundColor(.white)
@@ -70,7 +69,7 @@ struct ProductView: View {
                 }
 
                 Button(action: {
-                    self.showingDiscountProductSheet = true
+                    showingDiscountProductSheet = true
                 }) {
                     Label("Discount", systemImage: "percent")
                         .foregroundColor(.white)
@@ -86,9 +85,6 @@ struct ProductView: View {
         .shadow(radius: 5)
         .alert(isPresented: $showingDeleteAlert) {
             deleteAlert
-        }
-        .alert(isPresented: $showingEditAlert) {
-            updateAlert
         }
         .sheet(isPresented: $showingEditProductSheet) {
             editProductForm
@@ -109,14 +105,6 @@ struct ProductView: View {
         )
     }
     
-    var updateAlert: Alert {
-        Alert(
-            title: Text("Update error"),
-            message: Text("The updated product name is not unique."),
-            dismissButton: .cancel(Text("OK"))
-        )
-    }
-    
     var editProductForm: some View {
         VStack {
             TextField("Product Name", text: $nameString)
@@ -126,9 +114,10 @@ struct ProductView: View {
             TextField("Product Price", text: $priceString)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-            
+            Text(message)
             HStack(spacing: 10) {
                 Button("Cancel") {
+                    message = ""
                     showingEditProductSheet = false
                 }
                 .padding()
@@ -137,11 +126,13 @@ struct ProductView: View {
                 .cornerRadius(10)
 
                 Button("Edit Product") {
-                    let occur = stock.update_product(orig: product, new: Product(name: nameString, price: priceString))
-                    if occur == false {
-                        showingEditAlert = true
+                    let success = stock.update_product(orig: product, new: Product(name: nameString, price: priceString))
+                    if !success {
+                        message = "The product name need to be unique."
+                    } else {
+                        message = ""
+                        showingEditProductSheet = false
                     }
-                    showingEditProductSheet = false
                 }
                 .padding()
                 .background(Color.blue)

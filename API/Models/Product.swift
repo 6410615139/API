@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Product: Identifiable {
+class Product: ObservableObject {
     @Published var name: String
     @Published var price: Double
     @Published var discount_percent: Double
@@ -35,6 +35,6 @@ class Product: Identifiable {
     }
     
     func discount(percentage: Double) -> Double {
-        return self.price - (self.price * percentage)
+        return self.price - (self.price * percentage/100)
     }
 }

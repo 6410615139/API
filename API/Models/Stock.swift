@@ -15,7 +15,7 @@ class Stock: ObservableObject {
     }
     
     func find_index(_ product: Product) -> Int {
-        for (index, my_product) in container.enumerated() {
+        for (index, my_product) in self.container.enumerated() {
             if product.name == my_product.name {
                 return index
             }
@@ -23,8 +23,17 @@ class Stock: ObservableObject {
         return -1
     }
     
-    func is_unique(_ new: Product) -> Bool{
-        for product in container {
+    func is_unique(_ new: Product) -> Bool {
+        for product in self.container {
+            if new.name == product.name {
+                return false
+            }
+        }
+        return true
+    }
+    
+    func is_unique(_ new: Product, product_list: [Product]) -> Bool {
+        for product in product_list {
             if new.name == product.name {
                 return false
             }
@@ -41,8 +50,10 @@ class Stock: ObservableObject {
         }
     }
     
-    func update_product(orig: Product, new: Product) -> Bool{
-        if self.is_unique(new) {
+    func update_product(orig: Product, new: Product) -> Bool {
+        var temp = self.container
+        temp.remove(at: self.find_index(orig))
+        if self.is_unique(new, product_list: temp) {
             let index = find_index(orig)
             self.container[index] = new
             return true

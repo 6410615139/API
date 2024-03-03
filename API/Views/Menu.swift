@@ -7,30 +7,29 @@
 
 import SwiftUI
 
+var products: [Product] = [
+    Product(name: "Product 1", price: 1),
+    Product(name: "Product 2", price: 10.10),
+    Product(name: "Product 3", price: 20),
+]
+
 struct Menu: View {
     @Binding var sampleBill: Bill
-    @State private var products: [Product] = [
-        Product(name: "Product 1", price: 9.99),
-        Product(name: "Product 2", price: 19.99),
-        Product(name: "Product 3", price: 29.99),
-    ]
+    @Binding var sampleStock: Stock
     
     @State private var showingAddProductSheet = false
     @State private var newProductName = ""
     @State private var newProductPrice = ""
     
-    @State private var showingDeleteAlert = false
-    @State private var productToDelete: Product?
+    @State private var message = ""
 
+    
     var body: some View {
         NavigationView {
             VStack {
                 List {
-                    ForEach(products, id: \.name) { product in
-                        ProductRow(product: product, bill: $sampleBill) {
-                            productToDelete = product
-                            showingDeleteAlert = true
-                        }
+                    ForEach($sampleStock.container, id: \.name) { product in
+                        ProductRow(product: product, bill: $sampleBill, stock: $sampleStock)
                     }
                 }
                 NavigationLink(destination: BillView(bill: sampleBill)) {
@@ -55,12 +54,17 @@ struct Menu: View {
             .sheet(isPresented: $showingAddProductSheet) {
                 addProductForm
             }
-            .alert(isPresented: $showingDeleteAlert) {
-                deleteAlert
-            }
         }
     }
 
+    var addProductAlert: Alert {
+        Alert(
+            title: Text("Add product error"),
+            message: Text("The added product name is not unique."),
+            dismissButton: .cancel(Text("OK"))
+        )
+    }
+    
     var addProductForm: some View {
         VStack {
             TextField("Product Name", text: $newProductName)
@@ -71,24 +75,29 @@ struct Menu: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .keyboardType(.decimalPad)
                 .padding()
-            
-            HStack(spacing: 10) { // Added spacing for a little space between buttons
+            Text(message)
+            HStack(spacing: 10) {
                Button("Cancel") {
-                   // Dismiss the sheet
                    showingAddProductSheet = false
+                   message = ""
                }
                .padding()
                .background(Color.gray)
                .foregroundColor(.white)
                .cornerRadius(10)
 
-               Button("Add Product") {
-                   if let price = Double(newProductPrice), !newProductName.isEmpty {
-                       let newProduct = Product(name: newProductName, price: price)
-                       products.append(newProduct)
-                       showingAddProductSheet = false
-                   }
-               }
+                Button("Add Product") {
+                    let newProduct = Product(name: newProductName, price: Double(newProductPrice) ?? 0.0)
+                    let success = sampleStock.add_product(newProduct)
+                    if !success {
+                        message = "The product name need to be unique."
+                    } else {
+                        showingAddProductSheet = false
+                        newProductName = ""
+                        newProductPrice = ""
+                        message = ""
+                    }
+                }
                .padding()
                .background(Color.blue)
                .foregroundColor(.white)
@@ -97,35 +106,30 @@ struct Menu: View {
         }
         .padding()
     }
-
-    var deleteAlert: Alert {
-        Alert(
-            title: Text("Confirm Delete"),
-            message: Text("Are you sure you want to delete this product?"),
-            primaryButton: .destructive(Text("Delete")) {
-                if let product = productToDelete, let index = products.firstIndex(where: { $0.name == product.name }) {
-                    products.remove(at: index)
-                }
-            },
-            secondaryButton: .cancel()
-        )
-    }
 }
 
 struct ProductRow: View {
-    var product: Product
+    @Binding var product: Product
     @Binding var bill: Bill
-    var onDelete: () -> Void  // Closure to call when delete is triggered
+    @Binding var stock: Stock
 
     var body: some View {
-        NavigationLink(destination: ProductView(product: product)) {
+        NavigationLink(destination: ProductView(product: $product, stock: stock, bill: $bill)
+            ) {
             HStack {
                 Text(product.name)
                     .font(.title)
                 Spacer()
-                Text("$\(product.price, specifier: "%.2f")")
-                    .font(.subheadline)
-                    .padding(.leading, 8)
+                Text("\(product.price, specifier: "%.2f")฿")
+                    .font(.title3)
+                    .strikethrough(product.discount_percent > 0.0, color: .red)
+                    .foregroundColor(product.discount_percent > 0 ? .gray : .black)
+                if product.discount_percent > 0 {
+                    let discountedPrice: Double = product.discount(percentage: product.discount_percent)
+                    Text("Discounted \(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
+                        .font(.title3)
+                        .foregroundColor(.red)
+                }
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -134,6 +138,6 @@ struct ProductRow: View {
 
 struct Menu_Previews: PreviewProvider {
     static var previews: some View {
-        Menu(sampleBill: .constant(Bill()))
+        Menu(sampleBill: .constant(Bill()), sampleStock: .constant(Stock(products)))
     }
 }

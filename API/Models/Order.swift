@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Order {
+class Order: ObservableObject{
     var product: Product
     var amount: Int
     
@@ -17,6 +17,10 @@ class Order {
     }
     
     func price() -> Double {
-        return product.price * Double(amount)
+        if self.product.discount_percent == 0 {
+            return product.price * Double(amount)
+        } else {
+            return product.discount(percentage: product.discount_percent) * Double(amount)
+        }
     }
 }

@@ -9,42 +9,70 @@ import Foundation
 
 class Bill: ObservableObject {
     @Published var orders: [Order]
-    var total_amount: Int
-
+    @Published var total_amount: Int
+    @Published var total_price: Double
+    @Published var no_discount_price: Double
+    
     init() {
         self.orders = []
         self.total_amount = 0
+        self.total_price = 0
+        self.no_discount_price = 0
+    }
+    
+    func update() {
+        self.total_amount = self.update_amount()
+        self.total_price = self.update_price()
+        self.no_discount_price = self.update_no_discount_price()
     }
 
-    func total() -> Double {
+    func update_no_discount_price() -> Double {
         var total: Double = 0
-        for order in orders {
+        for order in self.orders {
+            total += (order.product.price * Double(order.amount))
+        }
+        return total
+    }
+    
+    func update_price() -> Double {
+        var total: Double = 0
+        for order in self.orders {
             total += order.price()
         }
         return total
     }
     
-    func add_order(new_order: Order) {
-        var exist = false
-        for (index,value) in self.orders.enumerated() {
-            if value.product.name == new_order.product.name {
-                exist = true
-                self.orders[index] = new_order
+    func update_amount() -> Int {
+        var total: Int = 0
+        for order in self.orders {
+            total += order.amount
+        }
+        return total
+    }
+    
+    func find_index(_ order: Order) -> Int {
+        for (index, my_order) in self.orders.enumerated() {
+            if my_order.product.name == order.product.name {
+                return index
             }
         }
-        if !exist {
+        return -1
+    }
+    
+    func add_order(_ new_order: Order) {
+        let index = find_index(new_order)
+        if index == -1 {
             self.orders.append(new_order)
+        } else {
+            self.orders[index] = new_order
         }
+        self.update()
     }
     
-    func delete_order(order: Order) {
-        for (index,value) in self.orders.enumerated() {
-            if value.product.name == order.product.name {
-                self.orders.remove(at: index)
-            }
-        }
+    func remove_order(_ order: Order) {
+        let index = find_index(order)
+        self.orders.remove(at: index)
+        self.update()
     }
-    
-    
     
 }

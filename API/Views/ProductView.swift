@@ -10,21 +10,25 @@ import SwiftUI
 struct ProductView: View {
     @ObservedObject var product: Product
     @ObservedObject var stock: Stock
-    @Binding var bill: Bill
+    @ObservedObject var bill: Bill
+    
+    @State private var navigateToBillView = false
     
     @State private var showingEditProductSheet = false
     @State private var showingDiscountProductSheet = false
+    @State private var showingAddToCartSheet = false
     @State private var showingDeleteAlert = false
     
     @State private var message = ""
     @State private var nameString = ""
     @State private var priceString = ""
-    @State private var discountPercentString: String = "0"
+    @State private var discountPercentString = "0"
+    @State private var amountString = ""
 
-    init(product: Product, stock: Stock, bill: Binding<Bill>) {
+    init(product: Product, stock: Stock, bill: Bill) {
             _product = ObservedObject(initialValue: product)
             _stock = ObservedObject(initialValue: stock)
-            _bill = bill
+            _bill = ObservedObject(initialValue: bill)
             _nameString = State(initialValue: product.name)
             _priceString = State(initialValue: "\(product.price)")
         }
@@ -42,42 +46,51 @@ struct ProductView: View {
 
             if product.discount_percent > 0 {
                 let discountedPrice: Double = product.discount(percentage: product.discount_percent)
-                Text("Discounted \(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
+                Text("-\(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
                     .font(.title3)
                     .foregroundColor(.red)
             }
 
             HStack(spacing: 7) {
                 Button(action: {
-                    showingDeleteAlert = true
-                }) {
-                    Label("Delete", systemImage: "trash")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.red)
-                        .cornerRadius(10)
-                }
-
-                Button(action: {
                     showingEditProductSheet = true
                 }) {
-                    Label("Edit", systemImage: "pencil")
+                    Image(systemName: "pencil")
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
-
                 Button(action: {
                     showingDiscountProductSheet = true
                 }) {
-                    Label("Discount", systemImage: "percent")
+                    Image(systemName: "percent")
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.green)
                         .cornerRadius(10)
                 }
+                Button(action: {
+                    showingDeleteAlert = true
+                }) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.red)
+                        .cornerRadius(10)
+                }
+                Button(action: {
+                    showingAddToCartSheet = true
+                }) {
+                    Image(systemName: "cart")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.gray)
+                        .cornerRadius(10)
+                }
             }
+            NavigationLink(destination: BillView(bill: bill), isActive: $navigateToBillView) {
+                EmptyView()}
         }
         .padding()
         .background(Color(.systemGray6))
@@ -91,6 +104,9 @@ struct ProductView: View {
         }
         .sheet(isPresented: $showingDiscountProductSheet) {
             discountProductForm
+        }
+        .sheet(isPresented: $showingAddToCartSheet) {
+            addToCartForm
         }
     }
     
@@ -130,7 +146,6 @@ struct ProductView: View {
                 .background(Color.gray)
                 .foregroundColor(.white)
                 .cornerRadius(10)
-
                 Button("Edit Product") {
                     let success = stock.update_product(orig: product, new: Product(name: nameString, price: priceString))
                     if !success {
@@ -148,7 +163,6 @@ struct ProductView: View {
         }
         .padding()
     }
-
     
     var discountProductForm: some View {
         VStack {
@@ -170,6 +184,39 @@ struct ProductView: View {
                     if let discount = Double(discountPercentString) {
                         product.discount_percent = discount
                         showingDiscountProductSheet = false
+                    }
+                }
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            }
+        }
+        .padding()
+    }
+    
+    var addToCartForm: some View {
+        VStack {
+            TextField("Amount", text: $amountString)
+                .keyboardType(.decimalPad)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            
+            HStack(spacing: 10) {
+                Button("Cancel") {
+                    showingAddToCartSheet = false
+                }
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+
+                Button("Add to cart") {
+                    if let amount = Int(amountString) {
+                        let order = Order(product: product, amount: amount)
+                        bill.add_order(order)
+                        showingAddToCartSheet = false
+                        navigateToBillView = true
                     }
                 }
                 .padding()

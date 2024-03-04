@@ -14,7 +14,7 @@ var products: [Product] = [
 ]
 
 struct Menu: View {
-    @Binding var sampleBill: Bill
+    @ObservedObject var sampleBill: Bill
     @ObservedObject var sampleStock: Stock
     
     @State private var showingAddProductSheet = false
@@ -29,7 +29,7 @@ struct Menu: View {
             VStack {
                 List {
                     ForEach($sampleStock.container, id: \.name) { product in
-                        ProductRow(product: product.wrappedValue, bill: $sampleBill, stock: sampleStock)
+                        ProductRow(product: product.wrappedValue, bill: sampleBill, stock: sampleStock)
                     }
                 }
                 NavigationLink(destination: BillView(bill: sampleBill)) {
@@ -110,11 +110,11 @@ struct Menu: View {
 
 struct ProductRow: View {
     @ObservedObject var product: Product
-    @Binding var bill: Bill
+    @ObservedObject var bill: Bill
     @ObservedObject var stock: Stock
 
     var body: some View {
-        NavigationLink(destination: ProductView(product: product, stock: stock, bill: $bill)
+        NavigationLink(destination: ProductView(product: product, stock: stock, bill: bill)
             ) {
             HStack {
                 Text(product.name)
@@ -126,7 +126,7 @@ struct ProductRow: View {
                     .foregroundColor(product.discount_percent > 0 ? .gray : .black)
                 if product.discount_percent > 0 {
                     let discountedPrice: Double = product.discount(percentage: product.discount_percent)
-                    Text("Discounted \(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
+                    Text("-\(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
                         .font(.title3)
                         .foregroundColor(.red)
                 }
@@ -138,6 +138,6 @@ struct ProductRow: View {
 
 struct Menu_Previews: PreviewProvider {
     static var previews: some View {
-        Menu(sampleBill: .constant(Bill()), sampleStock: Stock(products))
+        Menu(sampleBill: Bill(), sampleStock: Stock(products))
     }
 }

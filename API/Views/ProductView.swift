@@ -39,14 +39,14 @@ struct ProductView: View {
                 .font(.title2)
                 .fontWeight(.bold)
 
-            Text("Price: \(product.price, specifier: "%.2f")")
+            Text("Price: \(product.price, specifier: "%.2f")฿")
                 .font(.title3)
                 .strikethrough(product.discount_percent > 0.0, color: .red)
                 .foregroundColor(product.discount_percent > 0 ? .gray : .black)
 
             if product.discount_percent > 0 {
                 let discountedPrice: Double = product.discount(percentage: product.discount_percent)
-                Text("-\(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
+                Text("-\(product.discount_percent, specifier: "%.0f")% \(discountedPrice, specifier: "%.2f")฿")
                     .font(.title3)
                     .foregroundColor(.red)
             }
@@ -170,9 +170,10 @@ struct ProductView: View {
                 .keyboardType(.decimalPad)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-            
+            Text(message)
             HStack(spacing: 10) {
                 Button("Cancel") {
+                    message = ""
                     showingDiscountProductSheet = false
                 }
                 .padding()
@@ -182,8 +183,15 @@ struct ProductView: View {
 
                 Button("Apply Discount") {
                     if let discount = Double(discountPercentString) {
-                        product.discount_percent = discount
-                        showingDiscountProductSheet = false
+                        if (discount > 100) || (discount < 0) {
+                            message = "The discount needs to be double in range 0 to 100."
+                        } else {
+                            message = ""
+                            product.discount_percent = discount
+                            showingDiscountProductSheet = false
+                        }
+                    } else {
+                        message = "The discount needs to be Double."
                     }
                 }
                 .padding()

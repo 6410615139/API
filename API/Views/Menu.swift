@@ -116,19 +116,27 @@ struct ProductRow: View {
     var body: some View {
         NavigationLink(destination: ProductView(product: product, stock: stock, bill: bill)
             ) {
-            HStack {
-                Text(product.name)
-                    .font(.title)
-                Spacer()
-                Text("\(product.price, specifier: "%.2f")฿")
-                    .font(.title3)
-                    .strikethrough(product.discount_percent > 0.0, color: .red)
-                    .foregroundColor(product.discount_percent > 0 ? .gray : .black)
-                if product.discount_percent > 0 {
-                    let discountedPrice: Double = product.discount(percentage: product.discount_percent)
-                    Text("-\(product.discount_percent, specifier: "%.2f")%: \(discountedPrice, specifier: "%.2f")฿")
+            VStack {
+                HStack {
+                    Text(product.name)
+                        .font(.title)
+                    Spacer()
+                    Text("\(product.price, specifier: "%.2f")฿")
                         .font(.title3)
-                        .foregroundColor(.red)
+                        .strikethrough(product.discount_percent > 0.0, color: .red)
+                        .foregroundColor(product.discount_percent > 0 ? .gray : .black)
+                    }
+                HStack {
+                    if product.discount_percent > 0 {
+                        let discountedPrice: Double = product.discount(percentage: product.discount_percent)
+                        Text("-\(product.discount_percent, specifier: "%.2f")%")
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                        Spacer()
+                        Text("\(discountedPrice, specifier: "%.2f")฿")
+                            .font(.title3)
+                            .foregroundColor(.red)
+                }
                 }
             }
         }

@@ -18,6 +18,7 @@
 		CE026C2C2B93956500D64F52 /* BillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE026C2B2B93956500D64F52 /* BillView.swift */; };
 		CE026C302B93B24700D64F52 /* ProductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE026C2F2B93B24700D64F52 /* ProductView.swift */; };
 		CE026C322B94784D00D64F52 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE026C312B94784D00D64F52 /* Stock.swift */; };
+		CE026C342B95A0A100D64F52 /* QRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE026C332B95A0A100D64F52 /* QRView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		CE026C2B2B93956500D64F52 /* BillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillView.swift; sourceTree = "<group>"; };
 		CE026C2F2B93B24700D64F52 /* ProductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductView.swift; sourceTree = "<group>"; };
 		CE026C312B94784D00D64F52 /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		CE026C332B95A0A100D64F52 /* QRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 				CE026C292B92725400D64F52 /* Menu.swift */,
 				CE026C2B2B93956500D64F52 /* BillView.swift */,
 				CE026C2F2B93B24700D64F52 /* ProductView.swift */,
+				CE026C332B95A0A100D64F52 /* QRView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -177,6 +180,7 @@
 				CE026C302B93B24700D64F52 /* ProductView.swift in Sources */,
 				CE026C282B9266AB00D64F52 /* Order.swift in Sources */,
 				CE026C202B9258CE00D64F52 /* Bill.swift in Sources */,
+				CE026C342B95A0A100D64F52 /* QRView.swift in Sources */,
 				CE026C2A2B92725400D64F52 /* Menu.swift in Sources */,
 				CE026C1D2B8CFA1A00D64F52 /* LoadingView.swift in Sources */,
 				CE026C0E2B8CE25800D64F52 /* APIApp.swift in Sources */,
